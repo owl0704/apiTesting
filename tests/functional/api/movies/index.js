@@ -157,8 +157,37 @@ describe("Movies endpoint", () => {
           .expect(200)
           .then((res) => {
             expect(res.body).to.have.property("title", movie.title);
+        });
+        describe("Delete /movies/:id", () => {
+            describe("when the id is valid", () => {
+              it("should return a 200 status and confirmation message", () => {
+                return request(api)
+                  .delete(`/api/movies/${currentMovieId}`)
+                  .set("Accept", "application/json")
+                  .expect("Content-Type", /json/)
+                  .expect(200)
+                  .expect({
+                    message: `Deleted movie id: ${currentMovieId}.`,
+                    status: 200,
+                  });
+              });
+              after(() => {
+                return request(api)
+                  .get(`/api/movies/${currentMovieId}`)
+                  .expect(404)
+                  .expect({
+                    message: `Unable to find movie with id: ${currentMovieId}.`,
+                    status: 404,
+                  });
+              });
+            });
+            describe("when the id is invalid", () => {
+              // TODO
+            });
           });
+        });
       });
+      
       describe("PUT /movies ", () => {
         it("should return a a copy of the updated  movie", () => {
           return request(api)
@@ -183,5 +212,17 @@ describe("Movies endpoint", () => {
               });
             });
       });
-
-    }); // end-POS
+      describe("when the id is invalid", () => {
+        it("should return a 404 status and Unable to find movie", () => {
+          return request(api)
+            .delete(`/api/movies/9999`)
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(404)
+            .expect({
+              message: "Unable to find movie with id: 9999.",
+              status: 404,
+            });
+        });
+      });
+    
