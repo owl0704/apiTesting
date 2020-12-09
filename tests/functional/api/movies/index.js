@@ -61,4 +61,75 @@ describe("Movies endpoint", () => {
           });
       });
     });
-});
+    describe("GET /movies/:id", () => {
+        describe("when the id is valid", () => {
+          it("should return the matching movie", () => {
+            return request(api)
+              .get(`/api/movies/${currentMovieId}`)
+              .set("Accept", "application/json")
+              .expect("Content-Type", /json/)
+              .expect(200)
+              .then((res) => {
+                expect(res.body).to.have.property("title", currentMovieTitle);
+              });
+          });
+        });
+        describe("when the id is invalid", () => {
+          it("should return the NOT found message", () => {
+            return request(api)
+              .get("/api/movies/9999")
+              .set("Accept", "application/json")
+              .expect("Content-Type", /json/)
+              .expect({
+                message: "Unable to find movie with id: 9999.",
+                status: 404,
+              });
+          });
+        });
+      });
+      describe("POST /movies ", () => {
+        it("should return a 201 status and the newly added movie", () => {
+          return request(api)
+            .post("/api/movies")
+            .send(movie)
+            .expect(201)
+            .then((res) => {
+              expect(res.body.title).equals(movie.title);
+              movieId = res.body.id;
+            });
+        });
+      });
+      after(() => {
+        return request(api)
+          .get(`/api/movies/${movieId}`)
+          .expect(200)
+          .then((res) => {
+            expect(res.body).to.have.property("title", movie.title);
+          });
+      });
+      describe("PUT /movies ", () => {
+        it("should return a a copy of the updated  movie", () => {
+          return request(api)
+            .put(`/api/movies/${movieId}`)
+            .send(movie)
+            .expect(200)
+            .then((res) => {
+              expect(res.body.title).equals(movie.title);
+              movieId = res.body.id;
+            });
+        });
+        it("should return the  message:'unable to find movie'", () => {
+            return request(api)
+              .put("/api/movies/id")
+              .send(movie)
+              .expect(404)
+              .then((res)=>{
+                expect({
+                message: "Unable to find movie .",
+                });
+                movieId=res.body.id;
+              });
+            });
+      });
+
+    }); // end-POS
